@@ -87,9 +87,9 @@ void Game::InitializeEnemyBoard()
 void Game::InitializeAbilities(Field a_enemy, ShipManager b_enemy, size_t x, size_t y)
 {
     AbilitiesManager am;
-	am.ApplicationOfAbilities(a_enemy, b_enemy, 2, 1);
-	am.ApplicationOfAbilities(a_enemy, b_enemy, 2, 1);
-	am.ApplicationOfAbilities(a_enemy, b_enemy, 2, 1);
+	am.ApplicationOfAbilities(a_enemy, b_enemy, x, y);
+	am.ApplicationOfAbilities(a_enemy, b_enemy, x, y);
+	am.ApplicationOfAbilities(a_enemy, b_enemy, x, y);
 }
 
 bool Game::Round()
