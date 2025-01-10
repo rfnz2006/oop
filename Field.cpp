@@ -128,6 +128,8 @@ CellState Field::attack(size_t x, size_t y) {
 	size_t w = cells_grid[0].size(); 
 
 	int ship_index = cells_grid[y][x].get_value(); 
+	 std::cout << "attacking??" << std::endl;
+	  std::cout << ship_index << std::endl;
 	if (ship_index < 0) 
 		return CellState::empty; 
 	ShipManager manager = get_ship_manager();
@@ -157,7 +159,7 @@ size_t Field::get_height(){
 }
  
 void Field::PrintField() const{ 
-    std::cout << "\n- The playing field -" << std::endl; 
+    std::cout << "\n- The playing field --" << std::endl; 
     for (size_t y = 0; y < size_t(cells_grid.size()); y++) { 
         for (size_t x = 0; x < size_t(cells_grid[0].size()); x++) { 
               

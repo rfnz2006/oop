@@ -22,8 +22,8 @@ struct GameState {
 enum class RoundResult{Quit,GameOver,RoundOver,Continue};
 class Game {
 private:
-    size_t BoardWidth = 10;
-    size_t BoardHeight = 10;
+    size_t BoardWidth = 30;
+    size_t BoardHeight = 30;
     Field   PlayerBoard;
     Field   EnemyBoard;
     GameState State;

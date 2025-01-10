@@ -7,6 +7,7 @@
 #include <random>
 #include <fstream>
 #include <sstream>
+#include <ctime>
 
 
 void GameState::Init()
@@ -37,6 +38,7 @@ Game::~Game()
 
 void Game::InitializeGame(bool gen)
 {
+   std::cout << "initi...." << std::endl;
     InitializeEnemyBoard();
     InitializePlayerBoard(gen);
     //Abilities.InitForNewGame(BoardWidth,BoardHeight);
@@ -63,7 +65,7 @@ std::string Game::GetAbilityMessage()
     return std::move(AbilityMessage);
 }
 
-bool Game::PlacePlayerShip(int indx,size_t x, size_t y, ShipOrientation ori)
+bool Game::PlacePlayerShip(int indx, size_t x, size_t y, ShipOrientation ori)
 {
     bool newship = false;
     try {
@@ -79,12 +81,71 @@ void Game::InitializeRound()
 {
     InitializeEnemyBoard();
 }
-
 Field Game::GenerateRandomBoard()
 {
+    std::cout << "Generating RandomBoard" << std::endl;
+    
+    ShipManager ship_man({4,3,3,2,2,2,1,1,1,1});
+    Field b(ship_man, 10, 10);
+    
+    srand(time(0)); // Seed the random number generator
+    
+    for (int i = 0; i < 10; i++) {
+        std::cout << i << ": ";
+        
+        unsigned x, y;
+        bool newship;
+        int attempts = 0;
+        const int maxAttempts = 100; // Limit number of attempts
+        
+        do {
+            auto ori = (std::rand() % 2) ? ShipOrientation::horizontal : ShipOrientation::vertical;
+            auto s = ship_man[i].get_length();
+            
+            if (ori == ShipOrientation::horizontal) {
+                x = std::rand() % (BoardWidth - s);
+                y = std::rand() % BoardHeight;
+            } else {
+                x = std::rand() % BoardWidth;
+                y = std::rand() % (BoardHeight - s);
+            }
+            
+            newship = false;
+            
+            try {
+                newship = b.PlaceShip(i, x, y, ori);
+                
+                if (!newship && attempts < maxAttempts) {
+                    throw std::runtime_error("Failed to place ship after multiple attempts");
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "Error placing ship " << i << ": " << e.what() << std::flush;
+                
+                // Log the position that caused the error
+                std::cout << "Failed at (" << x << ", " << y << ") orientation: " 
+                          << (ori == ShipOrientation::horizontal ? "H" : "V") << std::endl;
+                
+                attempts++;
+            }
+            
+            if (!newship && attempts >= maxAttempts) {
+                throw std::runtime_error("Max attempts reached while placing ship");
+            }
+            
+            std::cout << "Random position: (" << x << ", " << y << ")" << std::endl;
+        } while (!newship && attempts < maxAttempts);
+        
+        std::cout << "field generated" << std::endl;
+        b.PrintField();
+        return b;
+    }
+}
+/*
+    std::cout << "Generating RandomBoard" << std::endl;
     ShipManager ship_man({4,3,3,2,2,2,1,1,1,1});
     Field b(ship_man, 10, 10);
     for (int i = 0; i < 10; i++) {
+        std::cout << i << std::endl;
         bool newship;
         do {
             auto ori = std::rand() & 1 ? ShipOrientation::horizontal : ShipOrientation::vertical;
@@ -106,8 +167,10 @@ Field Game::GenerateRandomBoard()
             }
         } while (!newship);
     }
-    return b;
-}
+          std::cout << "field generated" << std::endl;
+    b.PrintField();
+    return b;*/
+
 
 
 
@@ -119,16 +182,19 @@ void Game::InitializePlayerBoard(bool gen)
     }
     ShipManager sm({ 4,3,3,2,2,2,1,1,1,1 });
     PlayerBoard = Field(sm, BoardWidth, BoardHeight);
+    //PlayerBoard.PrintField();
 }
 
 void Game::InitializeEnemyBoard()
-{
+{  std::cout << "initializing enemy" << std::endl;
     EnemyBoard = GenerateRandomBoard();
 }
 
 
 RoundResult Game::Turn(size_t x, size_t y, bool ab)
 {
+
+    std::cout << "turning" << std::endl;
     State.RoundNumber += 1;
     UserTurn(x, y, ab); 
     if (EnemyBoard.get_ship_manager().AllDestroyed()) {
@@ -155,6 +221,9 @@ bool Game::UserTurn(size_t x, size_t y, bool use_ability)
     }
 
     //perform attack
+        std::cout << "attacking??" << std::endl;
+        std::cout << x << std::endl;
+        std::cout << y << std::endl;
     auto cs = EnemyBoard.attack(x, y);
     int index =  EnemyBoard.get_cell_value(x, y);
     ShipState ss =  EnemyBoard.get_ship_manager()[index].state();
